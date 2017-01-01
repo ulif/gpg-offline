@@ -4,6 +4,8 @@
 # This script requires an existent user on the target system. You can set the
 # user and userhome below.
 #
+# It will also be run automatically to provision local vagrant boxes.
+#
 ---
 - hosts: all
   #  Do not set this to "yes". This would break `username` determination below.
@@ -42,7 +44,7 @@
     apt_key:
         keyserver: keyserver.ubuntu.com
         id: 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367
-  
+
   - name: Aptitude safe-upgrade
     apt: upgrade=safe update_cache='yes'
     become: yes
