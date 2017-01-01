@@ -1,0 +1,42 @@
+# Ansible playbook to provision offline gpg stations
+# Based on Debian 8 (jessie).
+#
+# This script requires an existent user on the target system. You can set the
+# user and userhome below.
+#
+---
+- hosts: all
+  #  Do not set this to "yes". This would break `username` determination below.
+  become: no
+  vars:
+    # do you want test packages installed (additionally)?
+    install_test_packages: false
+    # username to install nominatim as
+    username: "{{ ansible_ssh_user }}"
+    userhome: "/home/{{ username }}"
+
+  tasks:
+  - name: Update package cache if not done in last 24 hours.
+    apt: update_cache=yes cache_valid_time=86400
+    become: yes
+
+  - name: Install system packages
+    package:
+      name={{ item }}
+      state=present
+    become: yes
+    with_items:
+      - aptitude
+
+  - name: Aptitude safe-upgrade
+    apt: upgrade=safe
+    become: yes
+
+  - name: Install all packages needed for gpg-offline
+    apt:
+      name: "{{ item }}"
+      state: present
+    become: yes
+    with_items:
+      - git
+      - acl     #  for safe privilege escalation with ansible
