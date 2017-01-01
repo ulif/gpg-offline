@@ -27,16 +27,34 @@
     become: yes
     with_items:
       - aptitude
+      - software-properties-common  # for add-apt-repository
 
+  - name: Add apt-repo `ansible` for recent ansible version
+    become: yes
+    apt_repository:
+        repo: "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main"
+        state: present
+        update_cache: yes
+        filename: ansible
+
+  - name: Enable key for ansible repo
+    become: yes
+    apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367
+  
   - name: Aptitude safe-upgrade
-    apt: upgrade=safe
+    apt: upgrade=safe update_cache='yes'
     become: yes
 
-  - name: Install all packages needed for gpg-offline
+  - name: Install packages needed for gpg-offline
     apt:
       name: "{{ item }}"
       state: present
+      update_cache: yes
     become: yes
     with_items:
+      - ansible  #  need ansible locally when going offline
+      - acl      #  for safe privilege escalation with ansible
       - git
-      - acl     #  for safe privilege escalation with ansible
+
